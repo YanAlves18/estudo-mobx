@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'login/login_screen.dart';
+import 'login/login_store.dart';
+import 'model/theme_model.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  final Brightness platformBrightness = WidgetsBinding.instance!.window.platformBrightness;
+  final bool isDarkMode = platformBrightness == Brightness.dark;
+
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<LoginStore>(create: (_) => LoginStore()),
+        ChangeNotifierProvider<ThemeModel>(
+          create: (_) => ThemeModel(isDarkMode),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -12,12 +29,14 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData.light(), // tema claro
-      darkTheme: ThemeData.dark(), // tema escuro
-      themeMode: ThemeMode.system, // modo de tema automático
-      home: const LoginScreen(),
+    return Consumer<ThemeModel>(
+      builder: (context, themeModel, _) {
+        return MaterialApp(
+          title: 'Flutter Demo',
+          theme: themeModel.isDarkMode ? ThemeData.dark() : ThemeData.light(),
+          home: const LoginScreen(),
+        );
+      },
     );
   }
 }
