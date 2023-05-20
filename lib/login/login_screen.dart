@@ -1,6 +1,11 @@
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:projeto/home/home_screen.dart';
+import 'package:provider/provider.dart';
+
+import 'login_store.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -12,6 +17,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
+    final loginStore = Provider.of<LoginStore>(context);
+
     return SafeArea(
       child: Scaffold(
           body: Container(
@@ -34,22 +41,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(32),
                   ),
-                  child: TextField(
-                    controller: null,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      CpfInputFormatter(),
-                    ],
-                    onChanged: null,
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      hintText: "Cpf",
-                      border: InputBorder.none,
-                      prefixIcon: Icon(Icons.account_circle),
-                    ),
-                    textAlignVertical: TextAlignVertical.center,
-                  ),
+                  child: Observer(builder: (_) {
+                    return TextField(
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        CpfInputFormatter(),
+                      ],
+                      onChanged: loginStore.setCpf,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        hintText: "Cpf",
+                        border: InputBorder.none,
+                        prefixIcon: Icon(Icons.account_circle),
+                      ),
+                      textAlignVertical: TextAlignVertical.center,
+                    );
+                  }),
                 ),
                 const SizedBox(
                   height: 16,
@@ -60,42 +68,53 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(32),
                   ),
-                  child: const TextField(
-                    controller: null,
-                    keyboardType: TextInputType.text,
-                    onChanged: null,
-                    enabled: true,
-                    decoration: InputDecoration(
-                      hintText: 'Senha',
-                      border: InputBorder.none,
-                      prefixIcon: Icon(Icons.lock),
-                    ),
-                    textAlignVertical: TextAlignVertical.center,
-                  ),
+                  child: Observer(builder: (_) {
+                    return TextField(
+                      keyboardType: TextInputType.text,
+                      onChanged: loginStore.setPassword,
+                      enabled: true,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Senha',
+                        border: InputBorder.none,
+                        prefixIcon: Icon(Icons.lock),
+                      ),
+                      textAlignVertical: TextAlignVertical.center,
+                    );
+                  }),
                 ),
                 const SizedBox(
                   height: 16,
                 ),
                 SizedBox(
                   height: 44,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
+                  child: Observer(builder: (_) {
+                    return ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        elevation: 2.0,
                       ),
-                      elevation: 2.0,
-                    ),
-                    onPressed: () {},
-                    child: const Text(
-                      'Entrar',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                      onPressed: loginStore.canLogin
+                          ? () {
+                              Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const HomeScreen()));
+                            }
+                          : null,
+                      child: const Text(
+                        'Entrar',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                 ),
               ]),
             )),
